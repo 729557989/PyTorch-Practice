@@ -75,6 +75,6 @@ if __name__ == '__main__':
     w2s = Word2Sequence()
     w2s.fit(['I', 'am', 'your', 'father'])
     w2s.build_vocab(min=0)
-    ret = w2s.transform(['your', '奶奶', '的', '给', '我', '玩阴', '的', '是', '吧', '？'], max_len=10)
+    ret = w2s.transform(['your', '奶奶', '的', '给', '我', '玩', '阴', '的', '是', '吧', '？'], max_len=10)
     print(w2s.dict)
     print(ret)
