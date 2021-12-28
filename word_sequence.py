@@ -2,6 +2,7 @@
 实现的是: 构建词典，实现方法吧句子转化成数字序列何其翻转
 """
 
+
 class Word2Sequence:
     UNK_TAG = "UNK" # 未知符号
     PAD_TAG = "PAD" # padding符号
@@ -70,11 +71,24 @@ class Word2Sequence:
         """
         return [self.reverse_dict.get(idx) for idx in indices]
 
+    def __len__(self):
+        return (len(self.dict))
 
-if __name__ == '__main__':
-    w2s = Word2Sequence()
-    w2s.fit(['I', 'am', 'your', 'father'])
-    w2s.build_vocab(min=0)
-    ret = w2s.transform(['your', '奶奶', '的', '给', '我', '玩', '阴', '的', '是', '吧', '？'], max_len=10)
-    print(w2s.dict)
-    print(ret)
+
+# if __name__ == '__main__':
+#     w2s = Word2Sequence()
+#     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+#     for i, (input, target) in enumerate(get_dataloader(path)):
+#         w2s.fit(input)
+#     w2s.build_vocab(min=10)
+#     pickle.dump(w2s, open("./models/w2s.pkl", "rb"))
+#     print(len(w2s))
+
+
+# if __name__ == '__main__':
+#     w2s = Word2Sequence()
+#     w2s.fit(['I', 'am', 'your', 'father'])
+#     w2s.build_vocab(min=0)
+#     ret = w2s.transform(['your', '奶奶', '的', '给', '我', '玩', '阴', '的', '是', '吧', '？'], max_len=10)
+#     print(w2s.dict)
+#     print(ret)

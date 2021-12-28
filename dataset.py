@@ -5,14 +5,14 @@ import torch.nn.functional as F
 import pandas as pd
 import os
 import re
-
+from lib import ws
 
 # 1 数据集的准备
 
 class ImdbDataset(Dataset):
-    def __init__(self, train=True, shuffle=False, clean=False, split_size=0.7):
+    def __init__(self, path, train=True, shuffle=False, clean=False, split_size=0.7):
         self.train = train
-        self.data_path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+        self.data_path = path
         self.dataset = pd.read_csv(self.data_path)
         self.train_df = self.dataset[:int(self.dataset.shape[0]*split_size)] # self.dataset.shape[0] * 0.7 = 35000
         self.test_df = self.dataset[int(self.dataset.shape[0]*split_size):]  # self.dataset.shape[0] * 0.3 = 15000
@@ -40,9 +40,9 @@ class ImdbDataset(Dataset):
         return text
 
 
-def get_dataloader(train=True):
-    imdb_dataset = ImdbDataset(clean=True, shuffle=True, train=train)
-    dataloader = DataLoader(imdb_dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
+def get_dataloader(path, batch_size=8, train=True):
+    imdb_dataset = ImdbDataset(path, clean=True, shuffle=True, train=train)
+    dataloader = DataLoader(imdb_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     return dataloader
 
 
@@ -56,7 +56,8 @@ def collate_fn(batch):
 
 
 if __name__ == '__main__':
-    for i, (input, target) in enumerate(get_dataloader()):
+    path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+    for i, (input, target) in enumerate(get_dataloader(path)):
         print("label: {}, text: {}".format(input, target))
         print("*"*100)
         break
