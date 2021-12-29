@@ -4,8 +4,8 @@
 
 
 class Word2Sequence:
-    UNK_TAG = "UNK" # 未知符号
-    PAD_TAG = "PAD" # padding符号
+    UNK_TAG = "UNK" # 未知符号 填充: gives AI the info where the sentence stopped at
+    PAD_TAG = "PAD" # padding符号 填充: gives AI the info which words weren't included
 
     UNK = 0
     PAD = 1
@@ -77,7 +77,7 @@ class Word2Sequence:
 
 # if __name__ == '__main__':
 #     w2s = Word2Sequence()
-#     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+#     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
 #     for i, (input, target) in enumerate(get_dataloader(path)):
 #         w2s.fit(input)
 #     w2s.build_vocab(min=10)

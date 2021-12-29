@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     w2s = Word2Sequence()
-    path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+    path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
     for i, (target, input) in tqdm(enumerate(get_dataloader(path, batch_size=2))):
         for text in input:
             w2s.fit(text)

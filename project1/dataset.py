@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import pandas as pd
 import os
 import re
-from lib import ws
+from lib import ws, max_len
 
 # 1 数据集的准备
 
@@ -24,7 +24,6 @@ class ImdbDataset(Dataset):
         label = self.train_df.iloc[index]['sentiment'] if self.train else self.test_df.iloc[index]['sentiment']
         label = 1 if label == 'positive' else 0 # 0 == negative, 1 == positive
         text = self.tokenize(self.train_df.iloc[index]['review'] if self.train else self.test_df.iloc[index]['review'])
-
         return label, text
 
     def __len__(self):
@@ -40,7 +39,7 @@ class ImdbDataset(Dataset):
         return text
 
 
-def get_dataloader(path, batch_size=8, train=True):
+def get_dataloader(path, batch_size=2, train=True):
     imdb_dataset = ImdbDataset(path, clean=True, shuffle=True, train=train)
     dataloader = DataLoader(imdb_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     return dataloader
@@ -51,15 +50,20 @@ def collate_fn(batch):
     param batch: ([labels, tokens]， [labels, tokens], 一个getitem的结果...)
     '''
     #batch是list, 其中一个一个元组，每个元组是dataset中__getitem__的结果
-    text, label = list(zip(*batch))
+    label, text = list(zip(*batch))
+    # apply tokenization here with the ws model from lib.py
+    text = [ws.transform(word, max_len=max_len) for word in text] # make seq_len contain on 80 words
+    text = torch.LongTensor(text)
+    label = torch.LongTensor(label)
     return text, label
 
 
 if __name__ == '__main__':
-    path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\IMDB Dataset.csv"
+    path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
     for i, (input, target) in enumerate(get_dataloader(path)):
-        print("label: {}, text: {}".format(input, target))
-        print("*"*100)
+        # print("label: {}, text: {}".format(input, target))
+        print(input)
+        print(target)
         break
 
 
