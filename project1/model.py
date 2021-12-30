@@ -36,7 +36,17 @@ class NeuralNet(nn.Module):
                             batch_first=True,
                             bidirectional=bidirectional,
                             dropout=dropout)
-        self.fc = nn.Linear(hidden_size * 2, 2)#([hidden_size * 2 -> (256), 2]), because bidirectional, fw has 128 and bw has 128, 128 + 128 is just 256
+        self.neural_layers = nn.Sequential(
+            nn.Linear(hidden_size * 2, 128), #([hidden_size * 2 -> (256), 128]), because bidirectional, fw has 128 and bw has 128, 128 + 128 is just 256
+            nn.ReLU(True),
+            nn.BatchNorm1d(128),
+            nn.Dropout(0.2),
+            nn.Linear(128, 32),
+            nn.ReLU(True),
+            nn.BatchNorm1d(32),
+            nn.Dropout(0.2),
+            nn.Linear(32, 2)
+        )
     
     def forward(self, input): # input must be tensor not list
         """
@@ -49,19 +59,19 @@ class NeuralNet(nn.Module):
         # -> x:[batch_size, max_len, 2*hidden_size,], h_n(c_n too):[num_layers*2, batch_size, hidden_size]
         # 获取两个方向最后一次的output, 进行concat
         output_fw = h_n[-2, :, :] # 正向最后一次的输出
-        # shape: [4, 128]
+        # shape: [512, 128] # 512 is batch_size
         output_bw = h_n[-1, :, :] # 反向最后一次的输出
-        # shape: [4, 128]
-        output = torch.cat([output_fw, output_bw], dim=-1) #[batch_size, hidden_size*2]
-        # shape:[4, 256]
-        out = self.fc(output) #可以考虑添加一个新的全连接层作为输出层， 激活函数处理
-        # shape:[16, 2]
-        return F.log_softmax(out, dim=-1)
+        # shape: [512, 128] # 512 is batch_size
+        output = torch.cat([output_fw, output_bw], dim=-1) #[batch_size, hidden_size*2], do concatenation on [2]
+        # shape:[512, 256]
+        out = self.neural_layers(output) # shape: [512, 2]
+        return F.softmax(out, dim=-1)
 
 
 
 model = NeuralNet().to(device)
 optimizer = Adam(model.parameters(), 0.001)
+loss_func = nn.CrossEntropyLoss()
 if os.path.exists("models\model.pkl"):
     model.load_state_dict(torch.load("models\model.pkl"))
     optimizer.load_state_dict(torch.load("models\optimizer.pkl"))
@@ -78,7 +88,7 @@ def train(epoch):
         #梯度归0
         optimizer.zero_grad()
         output = model(input)
-        loss = F.nll_loss(output, target)
+        loss = loss_func(output, target)
         loss.backward()
         optimizer.step()
 
@@ -114,41 +124,16 @@ def eval():
 
 #NOTE: 参数 在 lib.py
 if __name__ == "__main__":
-    # # NOTE: for evaluation
-    # eval()
+    # NOTE: for evaluation
+    eval()
 
-    # NOTE: training
-    for i in range(1): # epoch = 10
-        start = time.time()
-        train(i)
-        stop = time.time()
-        print(f"Training Elapsed for epoch {i} : {stop - start}s")
+    # # NOTE: training
+    # for i in range(12): # epoch = 10
+    #     start = time.time()
+    #     train(i)
+    #     stop = time.time()
+    #     print(f"Training Elapsed for epoch {i} : {stop - start}s")
 
 # NOTE: max_len = 200
 # NOTE: embed_dim = 100
 # NOTE: len(ws) = 7002
-
-# check if pytorch is using GPU:
-# 1. go to CMD``
-# 2. enter: nvidia-smi
-# 3. see if GPU was used, don't trust the stupid TASK MANAGER
-
-
-
-#def test():
-#     test_loss = 0
-#     correct = 0
-#     model.eval()
-#     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
-#     test_dataloader = get_dataloader(path, batch_size=batch_size, train=False)
-#     with torch.no_grad():
-#         for idx, (input, target) in enumerate(test_dataloader):
-#             input = input.to(device)
-#             target = target.to(device)
-#             output = model(input)
-#             pred = torch.max(output, dim=-1, keepdim=False)[-1]
-#             test_loss += F.nll_loss(output, target, reduction="sum")
-#             correct = pred.eq(target.data).sum()
-#         test_loss = test_loss/len(test_dataloader.dataset)
-#         print("\nTest set Avg. loss: {:.4f}, Accuracy: {:.2f}%".format(test_loss, 
-#                                                                    100.0 * correct/len(test_dataloader.dataset)))
