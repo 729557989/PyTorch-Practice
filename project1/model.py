@@ -69,7 +69,10 @@ if os.path.exists("models\model.pkl"):
 def train(epoch):
     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
     dataloader = get_dataloader(path, batch_size=batch_size, train=True)
-    for idx, (input, target) in enumerate(dataloader):
+    for idx, (input, target) in tqdm.tqdm(enumerate(dataloader),
+                                          total=len(dataloader.dataset)/batch_size,
+                                          ascii=True,
+                                          desc="训练"):
         input = input.to(device)
         target = target.to(device)
         #梯度归0
@@ -78,11 +81,11 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        print(f"Epoch: {epoch}, Index: {idx}, Loss: {loss.item()}")
 
         if idx%100 == 0:
             torch.save(model.state_dict(),"models\model.pkl")
             torch.save(optimizer.state_dict(),"models\optimizer.pkl")
+    print(f"Epoch: {epoch}, Loss: {loss.item()}")
 
 
 
@@ -91,7 +94,10 @@ def eval():
     acc_list = []
     path = r"C:\Users\45323\OneDrive\桌面\新python文件夹\pytorch\project1\IMDB Dataset.csv"
     dataloader = get_dataloader(path, batch_size=test_batch_size, train=False)
-    for idx, (input, target) in enumerate(dataloader):
+    for idx, (input, target) in tqdm.tqdm(enumerate(dataloader),
+                                          total=len(dataloader.dataset)/test_batch_size,
+                                          ascii=True,
+                                          desc="测试"):
         input = input.to(device)
         target = target.to(device)
         with torch.no_grad():
@@ -108,15 +114,15 @@ def eval():
 
 #NOTE: 参数 在 lib.py
 if __name__ == "__main__":
-    # NOTE: for evaluation
-    eval()
+    # # NOTE: for evaluation
+    # eval()
 
-    # # NOTE: training
-    # for i in range(10):
-    #     start = time.time()
-    #     train(i)
-    #     stop = time.time()
-    #     print(f"Training Elapsed for epoch {i} : {stop - start}s")
+    # NOTE: training
+    for i in range(1): # epoch = 10
+        start = time.time()
+        train(i)
+        stop = time.time()
+        print(f"Training Elapsed for epoch {i} : {stop - start}s")
 
 # NOTE: max_len = 200
 # NOTE: embed_dim = 100
